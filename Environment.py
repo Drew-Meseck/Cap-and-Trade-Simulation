@@ -1,12 +1,16 @@
+from mesa import Model
+from mesa.time import RandomActivation
+from Company import Company
 
+class Environment(Model):
 
+    def __init__(self, N):
+        self.num_agents = N
+        self.schedule = RandomActivation(self)
 
-class Environment():
-    #Attributes of the environment
+        for i in range(self.num_agents):
+            a = Company(i, self)
+            self.schedule.add(a)
 
-
-    def __init__(self):
-        super().__init__()
-
-    #Behaviors of the environment
-    
+    def step(self):
+        self.schedule.step()

@@ -1,3 +1,4 @@
+from mesa import Agent
 
 
 class Allowance():

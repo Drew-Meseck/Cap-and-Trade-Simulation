@@ -2,7 +2,6 @@
 import numpy as np
 import pandas as pd
 import multiprocessing
-import mesa
 
 #Tools Used for data analysis
 import matplotlib.pyplot as plt
@@ -10,10 +9,12 @@ import matplotlib.pyplot as plt
 #Classes from this project
 from Company import Company
 from Allowance import Allowance
+from Environment import Environment
 
 
 def main():
-    pass
+   model = Environment(10)
+   model.step()
 
 
 
