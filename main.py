@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import multiprocessing
+import mesa
 
 #Tools Used for data analysis
 import matplotlib.pyplot as plt
