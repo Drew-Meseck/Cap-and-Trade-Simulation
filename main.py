@@ -13,7 +13,15 @@ from Environment import Environment
 
 
 def main():
-   model = Environment(10)
+   #Define default model parameters
+   num_agents = 100
+   auction_alloc = True
+   mean_tech_level = .5
+   strat_homogeneity = .5
+   size_homogeneity = .5
+   mean_size = .5
+
+   model = Environment(num_agents, auction_alloc, mean_tech_level, strat_homogeneity, size_homogeneity, mean_size)
    model.step()
 
 
