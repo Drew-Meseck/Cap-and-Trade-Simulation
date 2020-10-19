@@ -15,9 +15,13 @@ class Environment(Model):
         self.size_h = siH
         self.strat_profs = {}
         self.mean_size = mSize
+        self.lobby_threshold = .33
+        self.num_allow = 100
+        self.decN = 3
+        self.price = 10
 
         for i in range(self.num_agents):
-            a = Company(i, self, strat(), tech(), market_cap)
+            a = Company(i, self, self.strat(), self.tech(), self.market_cap)
             self.schedule.add(a)
 
     #Deterministic for Company Stochasticity
@@ -29,6 +33,27 @@ class Environment(Model):
 
     def market_cap(self):
         return normal(self.mean_size, 1 - self.size_h, size= None)
+    
+    def emit(self):
+        en = []
+        for i in self.schedule:
+            en.append[i.produceE()]
+        return sum(en)
+
+    def getlobbying(self):
+        l = []
+        for i in self.schedule:
+            l.append[i.lobby()]
+        return l
+
+    def decrement_allowances(self):
+        l = self.getlobbying()
+        if len(l) >= self.lobby_threshold:
+            lobTotal = sum(l)(1 / self.num_agents - len(l)) #Dont forget to figure out how to scale this so that this value goes between 0 and self.decN
+            dectempN = self.decN - lobTotal
+            return 0 if dectempN < 0 else self.num_allow - dectempN
+        else:
+            return self.num_allow - self.decN
     
     def step(self):
         self.schedule.step()
