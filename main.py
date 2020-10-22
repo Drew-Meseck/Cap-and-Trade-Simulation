@@ -16,12 +16,14 @@ def main():
    #Define default model parameters
    num_agents = 100
    auction_alloc = True
-   mean_tech_level = .5
+   mean_tech_level = 5
    strat_homogeneity = .5
    size_homogeneity = .5
    mean_size = .5
+   pen = .3
 
-   model = Environment(num_agents, auction_alloc, mean_tech_level, strat_homogeneity, size_homogeneity, mean_size)
+   model = Environment(num_agents, auction_alloc, mean_tech_level, strat_homogeneity, size_homogeneity, mean_size, pen)
+   model.setup()
    model.step()
 
 

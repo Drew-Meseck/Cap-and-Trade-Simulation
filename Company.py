@@ -1,37 +1,75 @@
-from mesa import Agent
 import random
+import math
+from numpy.random import normal
 
 
-
-class Company(Agent):
+class Company():
     #Attributes of a company
 
-    def __init__(self, unique_id, model, strats, tl, size):
-        super().__init__(unique_id, model)
+    def __init__(self, unique_id, m, strats, tl, size):
+        self.id = unique_id
+        self.model = m
         self.strat_set = strats
         self.capacity = size
         self.tech_level = tl
-        self.ti_mem = []
+        self.ti_mem = [self.tech_level]
         self.cash_on_hand = 0
+        self.current_invest = (0, 0)
+        self.ti_prop = .5
+        self.allowances_t = []
+        self.inv_t = 0
+        self.pi_t = 0
+
         
         
 
-
+    #Actions a Company Can Take
     def step(self):
-        print("I am agent " + str(self.unique_id) +".")
+        print("I am agent " + str(self.id) +".")
 
     
     def update_tech(self): #perhaps tech is in descrete integer levels and advance if past investment meets some threshold (not all past investment is kept!)
-        pass
-
+        val = 0
+        thresh = 0
+        for index, value in enumerate(self.ti_mem):
+            mult = 0
+            #peacewise function that describes inflection curve, peaking at period 2, effect ending at period 5
+            if index <= 2:
+                mult =  math.sqrt(index/2)
+            else:
+                mult = -1 * (math.sqrt(index - 1) + 2)
+                if mult < 0:
+                    mult = 0
+            #threshold value is greater than the average produced tech level, increased by the tech level but reduced by capacity (size of company)
+            thresh += mult * (sum(self.ti_mem[:4]) / 5 ) + (self.tech_level * (1/self.capacity))
+            mult = normal(mult, .1, size= None)
+            val += mult * self.ti_mem[index]
+        if val >= thresh:
+            self.tech_level += 1
+        
+    #Produce base on "Cobb-Douglass" approximation using size and ln(technology)
     def produce(self):
-        pass
+        A = math.log(self.tech_level)
+        cap = self.capacity 
+        prod = A * self.capacity
+        if float(len(self.allowances_t)) < prod:
+            prod = len(self.allowances_t)
+        self.pi_t = prod * self.model.price
+        self.cash_on_hand += self.pi_t
+        return prod
 
-    def produceE(self):
-        return self.produce * (1 / (random.randrange(.1, 3, .1) * self.tech_level - 3)) # has some random and asymptotic affect on emissions.
+    #Invest using investment strategy 
+    def invest(self):
+        self.ti_prop, inv_prop_t = self.strat_get_ti_prop()
+        self.inv_t = inv_prop_t * self.pi_t
+        self.cash_on_hand -= self.inv_t 
+        #return a tuple of (Tech_invest at t)
+        invest_now = (self.ti_prop * self.inv_t, (1-self.ti_prop) * self.inv_t)
+        self.ti_mem.insert(0, invest_now[0])
+        self.current_invest =  invest_now
+    
+    #determines the amount invested of profit each period and the distribution of that investment
+    def strat_get_ti_prop(self):
+        return (.2, .5)
 
-    def lobby(self):
-        pass
-
-
-    #Actions a Company Can Take
+    
