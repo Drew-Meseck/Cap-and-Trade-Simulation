@@ -52,8 +52,8 @@ class Company():
     def produce(self):
         A = math.log(self.tech_level)
         cap = self.capacity 
-        prod = A * self.capacity
-        if float(len(self.allowances_t)) < prod:
+        prod = int(A * self.capacity)
+        if len(self.allowances_t) < prod:
             prod = len(self.allowances_t)
         self.pi_t = prod * self.model.price
         self.cash_on_hand += self.pi_t
@@ -100,7 +100,7 @@ class Company():
         bid = 0
         if dec:
             pass # this is where the strategy set determines the level of the bid
-        return bid
+        return (self, bid)
 
 
         

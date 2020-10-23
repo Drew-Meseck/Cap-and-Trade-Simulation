@@ -6,11 +6,10 @@ import math
 
 class Environment():
 
-    def __init__(self, N, am, tl, stH, siH, mSize, pen):
+    def __init__(self, N, am, stH, siH, mSize, pen):
         self.schedule = []
         self.num_agents = N
         self.auction = am
-        self.tech_level = tl
         self.strat_h = stH
         self.size_h = siH
         self.strat_profs = {}
@@ -68,7 +67,7 @@ class Environment():
             #Generate Allowances:
             alls = []
             for i in range(self.num_allow):
-                alls.append(Allowance(i, owner = None))
+                alls.append(Allowance(i, o = None))
             #--------------------
             #Auction each allowance
             for allowance in alls:
