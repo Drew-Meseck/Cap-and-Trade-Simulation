@@ -1,4 +1,5 @@
 from Company import Company
+from Allowance import Allowance
 import random
 from numpy.random import normal
 import math
@@ -63,7 +64,23 @@ class Environment():
 
     def distribute_step(self):
         if self.auction:
-            pass
+            #This is where the auction each step takes place:
+            #Generate Allowances:
+            alls = []
+            for i in range(self.num_allow):
+                alls.append(Allowance(i, owner = None))
+            #--------------------
+            #Auction each allowance
+            for allowance in alls:
+                bidow = []
+                for comp in self.schedule:
+                    bidow.append(comp.submit_bid())
+                owns, bids = zip(*bidow)
+                win = max(bids)
+                index = bids.index(win)
+                owns[index].allowances_t.append(allowance)
+                allowance.owner = owns[index]
+            #------------------------------------------------
         else:
             pass
     

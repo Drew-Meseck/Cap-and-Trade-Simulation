@@ -19,6 +19,7 @@ class Company():
         self.allowances_t = []
         self.inv_t = 0
         self.pi_t = 0
+        self.prod_t = 0
 
         
         
@@ -56,6 +57,13 @@ class Company():
             prod = len(self.allowances_t)
         self.pi_t = prod * self.model.price
         self.cash_on_hand += self.pi_t
+        #Must use allowances in relation to production (all goods emit 1 ton / good)
+        for a in range(prod):
+            if len(self.allowances_t) == 0:
+                break
+            else:
+                self.allowances_t.pop()
+        self.prod_t = prod
         return prod
 
     #Invest using investment strategy 
@@ -71,5 +79,30 @@ class Company():
     #determines the amount invested of profit each period and the distribution of that investment
     def strat_get_ti_prop(self):
         return (.2, .5)
+
+
+    def bid_decision(self):
+        strat = self.strat_set[0] # get auction strategy profile
+        if strat == "bidder":
+            return True
+        elif strat == "market":
+            return False
+        elif strat == "balanced":
+            if len(self.allowances_t) < self.prod_t:
+                return True
+            else:
+                return False
+        return True
+
+    #Chooses amount of bid. (0 is the bid if not submitted)
+    def submit_bid(self):
+        dec = self.bid_decision()
+        bid = 0
+        if dec:
+            pass # this is where the strategy set determines the level of the bid
+        return bid
+
+
+        
 
     
