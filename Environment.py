@@ -80,6 +80,7 @@ class Environment():
                 owns[index].allowances_t.append(allowance)
                 allowance.owner = owns[index]
             #------------------------------------------------
+        #Output based allocation
         else:
             pass
     

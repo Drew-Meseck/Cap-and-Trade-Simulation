@@ -52,7 +52,7 @@ class Company():
     def produce(self):
         A = math.log(self.tech_level)
         cap = self.capacity 
-        prod = int(A * self.capacity)
+        prod = int(A * cap)
         if len(self.allowances_t) < prod:
             prod = len(self.allowances_t)
         self.pi_t = prod * self.model.price
