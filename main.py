@@ -20,11 +20,11 @@ def main():
    strat_homogeneity = .5
    size_homogeneity = .5
    mean_size = .5
-   pen = .3
+   i_cap_size = .2
 
-   model = Environment(num_agents, auction_alloc, strat_homogeneity, size_homogeneity, mean_size, pen)
+   model = Environment(num_agents, i_cap_size, auction_alloc, strat_homogeneity, size_homogeneity, mean_size)
    model.setup()
-   model.step()
+   #model.step()
 
 
 

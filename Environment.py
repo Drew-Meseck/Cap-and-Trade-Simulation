@@ -6,7 +6,7 @@ import math
 
 class Environment():
 
-    def __init__(self, N, am, stH, siH, mSize, pen):
+    def __init__(self, N, cap_size, am, stH, siH, mSize):
         self.schedule = []
         self.num_agents = N
         self.auction = am
@@ -15,16 +15,13 @@ class Environment():
         self.strat_profs = {}
         self.mean_size = mSize
         self.lobby_threshold = .33
-        self.num_allow = 100 # use a function of total initial emissions, cap by initial cap proportion, generate allowances.
+        self.num_allow = 0 # use a function of total initial emissions, cap by initial cap proportion, generate allowances. (see setup)
         self.decN = 3
         self.price = 10
         self.max_allow = self.num_allow
-        self.penalty = pen
         self.period = 1
-
-        for i in range(self.num_agents):
-            a = Company(i, self, self.strat(), self.tech(), self.market_cap())
-            self.schedule.append(a)
+        self.initial_cap = cap_size
+        self.em_t = 0
 
     #Deterministic for Company Stochasticity
     def strat(self):
@@ -88,9 +85,21 @@ class Environment():
         pass
 
     def setup(self):
+        for i in range(self.num_agents):
+            a = Company(i, self, self.strat(), self.tech(), self.market_cap())
+            self.schedule.append(a)
+
+        initial_emissions = []
         for i in self.schedule:
-            i.step()
-    
+            initial_emissions.append(i.produce_initial())
+            i.setup()
+        emissions = sum(initial_emissions)
+        print("Emissions Prior to Cap: " + str(emissions))
+        self.num_allow = int((1 - self.initial_cap) * emissions)
+        self.max_allow = self.num_allow
+        print("Number of allowances under cap: " + str(self.num_allow))
+
+
     def step(self):
         self.distribute_step()
         self.trade_step()

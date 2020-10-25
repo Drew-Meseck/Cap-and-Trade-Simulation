@@ -5,7 +5,9 @@ TO COMPLETE:
 
 SETUP:
 Create agents and produce unconstrained for period -1
+    -- DONE 10/25/20
 Determine the number of allowances based on current environmental emissions
+    -- DONE 10/25/20
 
 
 ALLOCATION:

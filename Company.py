@@ -10,9 +10,9 @@ class Company():
         self.id = unique_id
         self.model = m
         self.strat_set = strats
-        self.capacity = size
+        self.capacity = 100 * size
         self.tech_level = tl
-        self.ti_mem = [self.tech_level]
+        self.ti_mem = [0]
         self.cash_on_hand = 0
         self.current_invest = (0, 0)
         self.ti_prop = .5
@@ -25,7 +25,7 @@ class Company():
         
 
     #Actions a Company Can Take
-    def step(self):
+    def setup(self):
         print("I am agent " + str(self.id) +".")
 
     
@@ -64,7 +64,15 @@ class Company():
             else:
                 self.allowances_t.pop()
         self.prod_t = prod
-        return prod
+        #Handle how much is emitted based on production (also affected by technology level)
+        emit = prod * (1/ (random.randrange(.1, 2, .1) * self.tech_level))
+        return emit
+
+    def produce_initial(self):
+        prod = math.log(self.tech_level) * self.capacity
+        self.cash_on_hand += self.model.price * prod
+        return prod * (1/ (random.uniform(.1, 2) * self.tech_level))
+
 
     #Invest using investment strategy 
     def invest(self):
