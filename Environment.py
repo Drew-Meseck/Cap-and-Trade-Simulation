@@ -31,7 +31,7 @@ class Environment():
         return random.randint(1, 4)
 
     def market_cap(self):
-        return normal(self.mean_size, 1- self.size_h, size= None)
+        return random.triangular(0, 1, self.mean_size)
     
     def produce_emit(self):
         en = []
@@ -90,10 +90,13 @@ class Environment():
             self.schedule.append(a)
 
         initial_emissions = []
+        prod = []
         for i in self.schedule:
             initial_emissions.append(i.produce_initial())
+            prod.append(i.prod_t)
             i.setup()
         emissions = sum(initial_emissions)
+        print("Total Production Prior to Cap: " + str(sum(prod)))
         print("Emissions Prior to Cap: " + str(emissions))
         self.num_allow = int((1 - self.initial_cap) * emissions)
         self.max_allow = self.num_allow

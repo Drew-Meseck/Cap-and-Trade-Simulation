@@ -10,7 +10,7 @@ class Company():
         self.id = unique_id
         self.model = m
         self.strat_set = strats
-        self.capacity = 100 * size
+        self.capacity = 100 * size #sizing is weighted by a constant integer value that can be tweaked for more reasonable values for analysis.
         self.tech_level = tl
         self.ti_mem = [0]
         self.cash_on_hand = 0
@@ -27,6 +27,8 @@ class Company():
     #Actions a Company Can Take
     def setup(self):
         print("I am agent " + str(self.id) +".")
+        print(" I Have Technology Level: " + str(self.tech_level) + " And Size: " + str(self.capacity))
+        print()
 
     
     def update_tech(self): #perhaps tech is in descrete integer levels and advance if past investment meets some threshold (not all past investment is kept!)
@@ -70,6 +72,7 @@ class Company():
 
     def produce_initial(self):
         prod = math.log(self.tech_level) * self.capacity
+        self.prod_t = prod
         self.cash_on_hand += self.model.price * prod
         return prod * (1/ (random.uniform(.1, 2) * self.tech_level))
 
