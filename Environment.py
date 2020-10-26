@@ -79,7 +79,32 @@ class Environment():
             #------------------------------------------------
         #Output based allocation
         else:
-            pass
+            prod = []
+            total_all = 0
+            for c in self.schedule:
+                prod.append(c.prod_t)
+            total_prod = sum(prod)
+            for c in range(len(self.schedule)):
+                ratio = prod[c] / total_prod
+                na = int(ratio * self.num_allow)
+                for a in range(na):
+                    self.schedule[c].allowances_t.append(Allowance(a, self.schedule[c]))
+                total_all += na
+            
+            remain = self.num_allow - total_all
+            print("Remaining " + str(remain))
+            for a in range(remain):
+                x = random.choice(self.schedule)
+                x.allowances_t.append(Allowance(879, x))
+            remain -= remain
+
+            print("DISTRIBUTE STEP:")
+            print(str(total_all) + ' ' + str(self.num_allow))
+            print("Remaining: " + str(remain))
+            for i in self.schedule:
+                print(len(i.allowances_t))
+            
+
     
     def trade_step(self):
         pass
@@ -95,6 +120,7 @@ class Environment():
             initial_emissions.append(i.produce_initial())
             prod.append(i.prod_t)
             i.setup()
+
         emissions = sum(initial_emissions)
         print("Total Production Prior to Cap: " + str(sum(prod)))
         print("Emissions Prior to Cap: " + str(emissions))
@@ -105,11 +131,10 @@ class Environment():
 
     def step(self):
         self.distribute_step()
-        self.trade_step()
-        self.produce_emit()
-        self.invest_step()
-        self.decrement_allowances()
+        #self.trade_step()
+        #self.produce_emit()
+        #self.invest_step()
+        #self.decrement_allowances()
         self.period += 1
-        for i in self.schedule:
-            i.step()
-            print("My Technology Level is: " + str(i.tech_level))
+        #for i in self.schedule:
+            #i.setup()

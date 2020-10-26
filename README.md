@@ -17,6 +17,7 @@ ALLOCATION:
 Add strategy based bid decisions to company agents for the auction.
 
 Add output based allocation based on the number of allowances, companies, and capacity of those companies.
+    --DONE 10/25/20
 
 MARKET:
 Implement the trading step using market strategies (Most will probably try to buy to produce the max, size will factor in if they are big technology investors though).
