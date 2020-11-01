@@ -16,7 +16,7 @@ class Company(Agent):
         self.ti_mem = [0]
         self.cash_on_hand = 0
         self.current_invest = (0,0)
-        self.ti_prop = .5
+        self.ti_prop = .9
         self.allowances_t = []
         self.inv_t = 0
         self.pi_t = 0
@@ -27,6 +27,9 @@ class Company(Agent):
         print("I am agent " + str(self.unique_id) +".")
         print(" I Have Technology Level: " + str(self.tech_level) + " And Size: " + str(self.capacity))
         print()
+    
+    def step(self):
+        pass
 
     
     def update_tech(self): #perhaps tech is in descrete integer levels and advance if past investment meets some threshold (not all past investment is kept!)

@@ -28,6 +28,12 @@ DATA COLLECTION:
 Implement data collection for each period (use aggregation as well as maybe group by company type for strategy analysis.
 # ------------------------------------------------------------------------------------------------------------------------
 
+# TWEAKS
+# ----------------------------------------------------------------------------------------------------------------------
+Technology advancement is currently too difficult even for how difficult it is in real life - adjust the threshold calculation to something more reasonable.
+
+Fix Allowance Decrement
+# ----------------------------------------------------------------------------------------------------------------------
 # REFINEMENT AND EXPERIMENTATION
 # ----------------------------------------------------------------------------------------------------------------------
 DEBUG:

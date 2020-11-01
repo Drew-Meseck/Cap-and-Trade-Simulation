@@ -17,17 +17,23 @@ class Environment(Model):
         self.max_allow = 0
         self.decN = dec
         self.price = 10
+        self.mean_tech_level = 0
         self.initial_cap = cap_size
+        self.mean_tech_level = 0
+        self.period = 0
+        self.current_lobby = 0
 
-        self.schedule = []
+        self.schedule = RandomActivation(self)
         self.datacollector = DataCollector(
-            
+            {"mean_tech": "mean_tech_level", 
+            "total_lobby": "current_lobby", 
+            "n_allow": "num_allow"}
         )
 
         #SETUP CODE===================================================================
         for i in range(self.num_agents):
             a = Company(i, self, self.strat(), self.tech(), self.market_cap())
-            self.schedule.append(a)
+            self.schedule.add(a)
 
 
         self.running = True
@@ -44,17 +50,18 @@ class Environment(Model):
     
     def produce_emit(self):
         en = []
-        for i in self.schedule:
+        for i in self.schedule.agents:
             en.append(i.produce())
         return sum(en)
 
     def invest_step(self):
-        for i in self.schedule:
+        for i in self.schedule.agents:
             i.invest()
+            i.update_tech()
 
     def getlobbying(self):
         l = []
-        for i in self.schedule:
+        for i in self.schedule.agents:
             l.append(i.current_invest[0])
         return l
 
@@ -78,7 +85,7 @@ class Environment(Model):
             #Auction each allowance
             for allowance in alls:
                 bidow = []
-                for comp in self.schedule:
+                for comp in self.schedule.agents:
                     bidow.append(comp.submit_bid())
                 owns, bids = zip(*bidow)
                 win = max(bids)
@@ -90,39 +97,49 @@ class Environment(Model):
         else:
             prod = []
             total_all = 0
-            for c in self.schedule:
+            for c in self.schedule.agents:
                 prod.append(c.prod_t)
             total_prod = sum(prod)
-            for c in range(len(self.schedule)):
+            for c in range(len(self.schedule.agents)):
                 ratio = prod[c] / total_prod
                 na = int(ratio * self.num_allow)
                 for a in range(na):
-                    self.schedule[c].allowances_t.append(Allowance(a, self.schedule[c]))
+                    self.schedule.agents[c].allowances_t.append(Allowance(a, self.schedule.agents[c]))
                 total_all += na
             
             remain = self.num_allow - total_all
             print("Remaining " + str(remain))
             for a in range(remain):
-                x = random.choice(self.schedule)
+                x = random.choice(self.schedule.agents)
                 x.allowances_t.append(Allowance(879, x))
             remain -= remain
 
             print("DISTRIBUTE STEP:")
             print(str(total_all) + ' ' + str(self.num_allow))
             print("Remaining: " + str(remain))
-            for i in self.schedule:
+            for i in self.schedule.agents:
                 print(len(i.allowances_t))
 
 
     def trade_step(self):
         pass
 
+    #REPORTERS=================================================================
+    def update_reporters(self):
+        #get mean tech level
+        sum_tech = 0
+        for i in self.schedule.agents:
+            sum_tech += i.tech_level
+        self.mean_tech_level = sum_tech / len(self.schedule.agents)
+
+        self.current_lobby = sum(self.getlobbying())        
+
     def step(self):
         #DO INITIAL EMISSIONS TO DETERMINE ENVIRONMENT VARIABLES============================
-        if self.step == 1:
+        if self.period == 0:
             initial_emissions = []
             prod = []
-            for i in self.schedule:
+            for i in self.schedule.agents:
                 initial_emissions.append(i.produce_initial())
                 prod.append(i.prod_t)
                 i.setup()
@@ -136,13 +153,17 @@ class Environment(Model):
         #====================================================================================
 
         #STEP================================================================================
+        
         self.distribute_step()
         #self.trade_step()
         self.produce_emit()
         self.invest_step()
-        #self.decrement_allowances()
-        #for i in self.schedule:
+        self.decrement_allowances()
+        #for i in self.schedule.agents:
             #i.setup()
-        if self.step == 51:
+        self.update_reporters()
+        self.datacollector.collect(self)
+        self.period += 1
+        if self.period == 50:
             self.running = False
         #====================================================================================
