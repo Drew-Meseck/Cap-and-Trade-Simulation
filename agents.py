@@ -11,12 +11,13 @@ class Company(Agent):
     def __init__(self, unique_id, model, strats, tl, size):
         super().__init__(unique_id, model)
         self.strat_set = strats
+        self.s = size
         self.capacity = 100 * size #weighted by constant integer value to make it meaningful in math
         self.tech_level = tl
         self.ti_mem = [0]
         self.cash_on_hand = 0
-        self.current_invest = (0,0)
-        self.ti_prop = .9
+        self.current_lobby = 0
+        self.ti_prop = .5
         self.allowances_t = []
         self.inv_t = 0
         self.pi_t = 0
@@ -45,7 +46,7 @@ class Company(Agent):
                 if mult < 0:
                     mult = 0
             #threshold value is greater than the average produced tech level, increased by the tech level but reduced by capacity (size of company)
-            thresh += mult * (sum(self.ti_mem[:4]) / 5 ) + (self.tech_level * (1/self.capacity))
+            thresh += mult * (sum(self.ti_mem[:4]) / 5 ) + ((2 ** self.tech_level) * (1/self.capacity))
             mult = normal(mult, .1, size= None)
             val += mult * self.ti_mem[index]
         if val >= thresh:
@@ -53,26 +54,26 @@ class Company(Agent):
         
     #Produce base on "Cobb-Douglass" approximation using size and ln(technology)
     def produce(self):
-        A = math.log(self.tech_level)
-        cap = self.capacity 
+        A = math.log(self.tech_level + 1)
+        cap = self.capacity
         prod = int(A * cap)
-        if len(self.allowances_t) < prod:
-            prod = len(self.allowances_t)
+        r = random.uniform(.1, 2)
+        emit = int(prod / ( r * self.tech_level))
+        alls = len(self.allowances_t)
+        #Handle how much is emitted based on production (also affected by technology level)
+        if len(self.allowances_t) < emit:
+            prod = alls * (r * self.tech_level)
+            emit = int(prod / (r * self.tech_level))
         self.pi_t = prod * self.model.price
         self.cash_on_hand += self.pi_t
         #Must use allowances in relation to production (all goods emit 1 ton / good)
-        for a in range(prod):
-            if len(self.allowances_t) == 0:
-                break
-            else:
-                self.allowances_t.pop()
-        self.prod_t = prod
-        #Handle how much is emitted based on production (also affected by technology level)
-        emit = prod * (1/ (random.uniform(.1, 2) * self.tech_level))
+        for a in range(emit):
+            self.allowances_t.pop()
+        self.prod_t = prod        
         return emit
 
     def produce_initial(self):
-        prod = math.log(self.tech_level) * self.capacity
+        prod = math.log(self.tech_level + 1) * self.capacity
         self.prod_t = prod
         self.cash_on_hand += self.model.price * prod
         return prod * (1/ (random.uniform(.1, 2) * self.tech_level))
@@ -80,38 +81,46 @@ class Company(Agent):
 
     #Invest using investment strategy 
     def invest(self):
-        self.ti_prop, inv_prop_t = self.strat_get_ti_prop()
-        self.inv_t = inv_prop_t * self.pi_t
-        self.cash_on_hand -= self.inv_t 
-        #return a tuple of (Tech_invest at t)
-        invest_now = (self.ti_prop * self.inv_t, (1-self.ti_prop) * self.inv_t)
-        self.ti_mem.insert(0, invest_now[0])
-        self.current_invest =  invest_now
+        lob, tech, inv = self.get_invest_props()
+        i = self.pi_t * inv
+        self.inv_t = i * tech
+        self.ti_mem.insert(0, self.inv_t)
+        self.current_lobby = i * lob
+        self.cash_on_hand -= i
+        
     
     #determines the amount invested of profit each period and the distribution of that investment
-    def strat_get_ti_prop(self):
-        return (.2, .5)
+    def get_invest_props(self):
 
+        expec_l = (1 - self.model.lobby_threshold) * (sum(self.model.t_1_lobby_mem) / len(self.model.schedule.agents))
+        expec_t = sum(self.ti_mem) / len(self.ti_mem) * (self.model.lobby_threshold) + self.capacity
 
-    def bid_decision(self):
-        strat = self.strat_set[0] # get auction strategy profile
-        if strat == "bidder":
-            return True
-        elif strat == "market":
-            return False
-        elif strat == "balanced":
-            if len(self.allowances_t) < self.prod_t:
-                return True
-            else:
-                return False
-        return True
+        total_expec = expec_l + expec_t
+        prop_l = expec_l / total_expec
+        prop_t = expec_t / total_expec
 
-    #Chooses amount of bid. (0 is the bid if not submitted)
+        prop_i = random.uniform(.1, .4) 
+
+        #If the period is 0, size is the only information they have about the past, and how effective tech investment is.
+        if self.model.period == 0:
+            prop_t = self.s
+            prop_l = 1 - prop_t
+        return (prop_l, prop_t, prop_i)
+
+    def valuate(self):
+        #first estimate their total emissions for the current period
+        est_prod = math.log(self.tech_level + 1) * self.capacity
+        est_emit = est_prod / (random.uniform(.1, 2) * self.tech_level)
+        #the estimated emissions is the needed total allowances to produce at max capacity
+        #Now, they are constrained by their budget, so their valuation will be a ratio of these values
+        return self.cash_on_hand / est_emit
+
+    #Chooses amount of bid. (0 is the bid if not submitted or affordable)
     def submit_bid(self):
-        dec = self.bid_decision()
-        bid = 0
-        if dec:
-            pass # this is where the strategy set determines the level of the bid
+        #optimial bid in first price sealed bid auction is half of agent valuation.
+        bid = self.valuate() / 2
+        if self.cash_on_hand < bid:
+            bid = 0 
         return (self, bid)
 
 

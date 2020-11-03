@@ -19,15 +19,24 @@ class Environment(Model):
         self.price = 10
         self.mean_tech_level = 0
         self.initial_cap = cap_size
-        self.mean_tech_level = 0
         self.period = 0
+
+        #Reporters
+        self.mean_tech_level = 0
         self.current_lobby = 0
+        self.current_prod = 0
+        self.t_1_lobby_mem = [0 for i in range(self.num_agents)]
+        self.mean_cash_on_hand = 0
+        self.emissions_t = 0
+
 
         self.schedule = RandomActivation(self)
         self.datacollector = DataCollector(
             {"mean_tech": "mean_tech_level", 
             "total_lobby": "current_lobby", 
-            "n_allow": "num_allow"}
+            "n_allow": "num_allow",
+            "mean_prod": "current_prod",
+            "emissions": "emissions_t"}
         )
 
         #SETUP CODE===================================================================
@@ -52,27 +61,22 @@ class Environment(Model):
         en = []
         for i in self.schedule.agents:
             en.append(i.produce())
-        return sum(en)
+        self.emissions_t = sum(en)
 
     def invest_step(self):
         for i in self.schedule.agents:
             i.invest()
             i.update_tech()
+        self.getlobbying()
 
     def getlobbying(self):
         l = []
         for i in self.schedule.agents:
-            l.append(i.current_invest[0])
-        return l
+            l.append(i.current_lobby)
+        self.t_1_lobby_mem = l
 
     def decrement_allowances(self): #Change this to reflect the scaled value for lobbying
-        l = self.getlobbying()
-        if len(l) >= self.lobby_threshold:
-            lobTotal = sum(l) * (1 / self.num_agents - len(l)) #Dont forget to figure out how to scale this so that this value goes between 0 and self.decN
-            dectempN = self.decN - lobTotal
-            return 0 if dectempN < 0 else self.num_allow - dectempN
-        else:
-            return self.num_allow - self.decN
+        self.num_allow -= self.decN
 
     def distribute_step(self):
         if self.auction:
@@ -84,14 +88,14 @@ class Environment(Model):
             #--------------------
             #Auction each allowance
             for allowance in alls:
-                bidow = []
+                bid_high = (0, 0)
                 for comp in self.schedule.agents:
-                    bidow.append(comp.submit_bid())
-                owns, bids = zip(*bidow)
-                win = max(bids)
-                index = bids.index(win)
-                owns[index].allowances_t.append(allowance)
-                allowance.owner = owns[index]
+                    o, bid = comp.submit_bid()
+                    if bid > bid_high[1]:
+                        bid_high = (o, bid)
+                bid_high[0].cash_on_hand -= bid_high[1]
+                allowance.owner = bid_high[0]
+                bid_high[0].allowances_t.append(allowance)
             #------------------------------------------------
         #Output based allocation
         else:
@@ -128,11 +132,14 @@ class Environment(Model):
     def update_reporters(self):
         #get mean tech level
         sum_tech = 0
+        sum_prod = 0
         for i in self.schedule.agents:
             sum_tech += i.tech_level
+            sum_prod += i.prod_t
         self.mean_tech_level = sum_tech / len(self.schedule.agents)
+        self.current_prod = sum_prod / len(self.schedule.agents)
+        self.current_lobby = sum(self.t_1_lobby_mem)
 
-        self.current_lobby = sum(self.getlobbying())        
 
     def step(self):
         #DO INITIAL EMISSIONS TO DETERMINE ENVIRONMENT VARIABLES============================
@@ -144,26 +151,32 @@ class Environment(Model):
                 prod.append(i.prod_t)
                 i.setup()
 
-            emissions = sum(initial_emissions)
+            self.emissions_t = sum(initial_emissions)
             print("Total Production Prior to Cap: " + str(sum(prod)))
-            print("Emissions Prior to Cap: " + str(emissions))
-            self.num_allow = int((1 - self.initial_cap) * emissions)
+            print("Emissions Prior to Cap: " + str(self.emissions_t))
+            self.num_allow = int((1 - self.initial_cap) * self.emissions_t)
             self.max_allow = self.num_allow
             print("Number of allowances under cap: " + str(self.num_allow))
+            self.update_reporters()
+            self.datacollector.collect(self)
+            self.period += 1
+            
         #====================================================================================
 
         #STEP================================================================================
-        
-        self.distribute_step()
-        #self.trade_step()
-        self.produce_emit()
-        self.invest_step()
-        self.decrement_allowances()
-        #for i in self.schedule.agents:
-            #i.setup()
-        self.update_reporters()
-        self.datacollector.collect(self)
-        self.period += 1
-        if self.period == 50:
-            self.running = False
+        else:
+            self.update_reporters()
+            self.datacollector.collect(self)
+            self.distribute_step()
+            #self.trade_step()
+            self.produce_emit()
+            self.invest_step()
+            self.decrement_allowances()
+            #for i in self.schedule.agents:
+                #i.setup()
+            self.update_reporters()
+            self.datacollector.collect(self)
+            self.period += 1
+            if self.period == 50 + 1:
+                self.running = False
         #====================================================================================
