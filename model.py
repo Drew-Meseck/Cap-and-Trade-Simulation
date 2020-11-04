@@ -36,7 +36,8 @@ class Environment(Model):
             "total_lobby": "current_lobby", 
             "n_allow": "num_allow",
             "mean_prod": "current_prod",
-            "emissions": "emissions_t"}
+            "emissions": "emissions_t",
+            "mean_cash": "mean_cash_on_hand"}
         )
 
         #SETUP CODE===================================================================
@@ -166,11 +167,14 @@ class Environment(Model):
         #get mean tech level
         sum_tech = 0
         sum_prod = 0
+        sum_cash = 0
         for i in self.schedule.agents:
             sum_tech += i.tech_level
             sum_prod += i.prod_t
+            sum_cash += i.cash_on_hand
         self.mean_tech_level = sum_tech / len(self.schedule.agents)
         self.current_prod = sum_prod / len(self.schedule.agents)
+        self.mean_cash_on_hand = sum_cash / len(self.schedule.agents)
         self.current_lobby = sum(self.t_1_lobby_mem)
 
 
@@ -188,7 +192,7 @@ class Environment(Model):
             print("Total Production Prior to Cap: " + str(sum(prod)))
             print("Emissions Prior to Cap: " + str(self.emissions_t))
             self.num_allow = int((1 - self.initial_cap) * self.emissions_t)
-            self.max_allow = self.num_allow
+            self.max_allow = int(self.num_allow)
             print("Number of allowances under cap: " + str(self.num_allow))
             self.update_reporters()
             self.datacollector.collect(self)
@@ -198,8 +202,6 @@ class Environment(Model):
 
         #STEP================================================================================
         else:
-            self.update_reporters()
-            self.datacollector.collect(self)
             self.distribute_step()
             self.trade_step()
             self.produce_emit()

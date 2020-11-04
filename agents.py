@@ -53,7 +53,7 @@ class Company(Agent):
         if val >= thresh:
             self.tech_level += 1
         
-    #Produce base on "Cobb-Douglass" approximation using size and ln(technology)
+    #Produce base on "Cobb-Douglass" approximation using size and ln(technology + 1)
     def produce(self):
         A = math.log(self.tech_level + 1)
         cap = self.capacity
