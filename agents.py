@@ -22,6 +22,7 @@ class Company(Agent):
         self.inv_t = 0
         self.pi_t = 0
         self.prod_t = 0
+        self.more_trades = True
     
     #Actions a Company Can Take
     def setup(self):
@@ -122,6 +123,34 @@ class Company(Agent):
         if self.cash_on_hand < bid:
             bid = 0 
         return (self, bid)
+
+    def get_buy_sell(self):
+        est_prod = math.log(self.tech_level + 1) * self.capacity
+        est_emit = est_prod / (random.uniform(.1, 2) * self.tech_level)
+        stat = len(self.allowances_t) == est_emit
+        return True if stat else False
+
+
+    def sell_allowance(self):
+        est_prod = math.log(self.tech_level + 1) * self.capacity
+        est_emit = est_prod / (random.uniform(.1, 2) * self.tech_level)
+        diff = abs(len(self.allowances_t) - int(est_emit))
+        price = self.cash_on_hand / est_emit
+        return price * diff
+
+
+
+    def update_trading(self):
+        est_prod = math.log(self.tech_level + 1) * self.capacity
+        est_emit = est_prod / (random.uniform(.1, 2) * self.tech_level)
+        stat = len(self.allowances_t) == est_emit
+        if stat:
+            self.more_trades = False
+        else:
+            self.more_trades = True
+
+
+            
 
 
 

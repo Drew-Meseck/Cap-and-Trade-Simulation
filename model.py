@@ -126,8 +126,41 @@ class Environment(Model):
 
 
     def trade_step(self):
-        pass
+        market = []
+        for company in self.schedule.agents:
+            company.more_trades = True
+        trading = True
+        count = 0
+        while(trading and count < 10):
+            m_len_i = len(market)
+            for i in self.schedule.agents:
+                if i.more_trades:
+                    dec = i.get_buy_sell()
+                    if dec: #They want to buy
+                        target = i.valuate()
+                        for a in market:
+                            if a[1] <= target:
+                                seller = a[0]
+                                buyer = i
+                                seller.cash_on_hand += a[1]
+                                buyer.cash_on_hand -= a[1]
+                                buyer.allowances_t.append(seller.allowances_t.pop())
+                                break
+                    else: #They want to sell
+                        market.append(i.sell_allowance())
+                #Update the trading status of the emitter
+                i.update_trading()
+            if len(market) == 0 or len(market):
+                            trading = False
+            
+            agent_trades = [x.more_trades for x in self.schedule.agents]
 
+            if not any(agent_trades):
+                trading = False
+            
+            count += 1
+
+                
     #REPORTERS=================================================================
     def update_reporters(self):
         #get mean tech level
@@ -168,7 +201,7 @@ class Environment(Model):
             self.update_reporters()
             self.datacollector.collect(self)
             self.distribute_step()
-            #self.trade_step()
+            self.trade_step()
             self.produce_emit()
             self.invest_step()
             self.decrement_allowances()
