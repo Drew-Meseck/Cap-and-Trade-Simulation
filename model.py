@@ -77,7 +77,15 @@ class Environment(Model):
         self.t_1_lobby_mem = l
 
     def decrement_allowances(self): #Change this to reflect the scaled value for lobbying
-        self.num_allow -= self.decN
+        l = len(self.t_1_lobby_mem) * self.lobby_threshold
+        lob = [i for i in self.t_1_lobby_mem if i != 0]
+        dec = int(self.decN * self.num_allow)
+        if len(lob) >= l:
+            #decrement
+            modifier = sum(lob) / sum(self.t_1_lobby_mem) * random.uniform(.5, 1.5) #Random effectiveness of lobbying
+            dec = dec * modifier if dec * modifier <= dec else 0
+        
+        self.num_allow -= dec
 
     def distribute_step(self):
         if self.auction:
@@ -212,6 +220,6 @@ class Environment(Model):
             self.update_reporters()
             self.datacollector.collect(self)
             self.period += 1
-            if self.period == 50 + 1:
+            if self.period == 500 + 1:
                 self.running = False
         #====================================================================================

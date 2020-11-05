@@ -7,7 +7,7 @@ from model import Environment
 tech_chart = ChartModule([{"Label": "mean_tech", "Color": "Black"}])
 prod_chart = ChartModule([{"Label": "mean_prod", "Color": "Blue"}])
 emit_chart = ChartModule([{"Label": "emissions", "Color" : "Red"}])
-cash_chart = ChartModule([{"Label": "mean_cash", "Color": "Green"}])
+cash_chart = ChartModule([{"Label": "n_allow", "Color": "Green"}])
 
 model_params = {
     "N": UserSettableParameter("slider", "Number of Agents", 100, 10, 200, 10),
@@ -15,7 +15,7 @@ model_params = {
     "am": UserSettableParameter("checkbox", "Auction Distribution?", False),
     "mSize": UserSettableParameter("slider", "Mean Size Level", .5, .1, 1, .1),
     "mTech": UserSettableParameter("slider", "Mean Technology Level", 3, 1, 10, 1),
-    "dec": UserSettableParameter("slider", "Allowance Decrement Per Period", 5, 1, 30, 1)
+    "dec": UserSettableParameter("slider", "Allowance Decrement Percentage Per Period", .05, .001, .1, .001)
 }
 
 server = ModularServer(

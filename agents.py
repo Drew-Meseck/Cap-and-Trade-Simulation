@@ -100,6 +100,7 @@ class Company(Agent):
         prop_l = expec_l / total_expec
         prop_t = expec_t / total_expec
 
+        #This is what still needs to get fixed.
         prop_i = random.uniform(.1, .4) 
 
         #If the period is 0, size is the only information they have about the past, and how effective tech investment is.
