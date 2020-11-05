@@ -120,18 +120,18 @@ class Environment(Model):
                     self.schedule.agents[c].allowances_t.append(Allowance(a, self.schedule.agents[c]))
                 total_all += na
             
-            remain = self.num_allow - total_all
-            print("Remaining " + str(remain))
+            remain = int(self.num_allow - total_all)
+            #print("Remaining " + str(remain))
             for a in range(remain):
                 x = random.choice(self.schedule.agents)
                 x.allowances_t.append(Allowance(879, x))
             remain -= remain
 
-            print("DISTRIBUTE STEP:")
-            print(str(total_all) + ' ' + str(self.num_allow))
-            print("Remaining: " + str(remain))
-            for i in self.schedule.agents:
-                print(len(i.allowances_t))
+            #print("DISTRIBUTE STEP:")
+            #print(str(total_all) + ' ' + str(self.num_allow))
+            #print("Remaining: " + str(remain))
+            #for i in self.schedule.agents:
+               #print(len(i.allowances_t))
 
 
     def trade_step(self):
@@ -215,11 +215,9 @@ class Environment(Model):
             self.produce_emit()
             self.invest_step()
             self.decrement_allowances()
-            #for i in self.schedule.agents:
-                #i.setup()
             self.update_reporters()
             self.datacollector.collect(self)
             self.period += 1
-            if self.period == 500 + 1:
+            if self.period == 500 + 1 or self.num_allow <= 10:
                 self.running = False
         #====================================================================================

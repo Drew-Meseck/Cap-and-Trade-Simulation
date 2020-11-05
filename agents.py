@@ -92,8 +92,8 @@ class Company(Agent):
     
     #determines the amount invested of profit each period and the distribution of that investment
     def get_invest_props(self):
-
-        expec_l = (1 - self.model.lobby_threshold) * (sum(self.model.t_1_lobby_mem) / len(self.model.schedule.agents))
+        expec_dec = self.model.decN * self.model.num_allow
+        expec_l = ((1 - self.model.lobby_threshold) * (sum(self.model.t_1_lobby_mem) / len(self.model.schedule.agents))) + expec_dec
         expec_t = sum(self.ti_mem) / len(self.ti_mem) * (self.model.lobby_threshold) + self.capacity
 
         total_expec = expec_l + expec_t
