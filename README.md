@@ -1,45 +1,14 @@
 # Cap-and-Trade-Simulation
 Economics Capstone
 
-TO COMPLETE:
+# To Run this Model:
+1) Clone or download this repository
 
-SETUP:
-Create agents and produce unconstrained for period -1
-    -- DONE 10/25/20
-Determine the number of allowances based on current environmental emissions
-    -- DONE 10/25/20
+2) Install the requirements from the requirements.txt folder either onto your machine or in a virtual environment contained within the main project directory.
 
+3) Navigate to the main directory, (ensuring your virtual environment is active if you used one)
 
-# IMPLEMENTATION
-# ----------------------------------------------------------------------------------------------------------------------
+4) type "mesa runserver" into the command line in the project folder, this will call the run.py script which launches the specified server GUI from the server.py folder. A new browser window should open on a locally hosted port.
 
-ALLOCATION:
-Add strategy based bid decisions to company agents for the auction.
+5) Drag input sliders to desired values, and select the auction status, and select "Start" this should run the model!
 
-Add output based allocation based on the number of allowances, companies, and capacity of those companies.
-    --DONE 10/25/20
-
-MARKET:
-Implement the trading step using market strategies (Most will probably try to buy to produce the max, size will factor in if they are big technology investors though).
-
-Really refine this system and read about how this should play out based on existing literature to justify.
-
-DATA COLLECTION:
-Implement data collection for each period (use aggregation as well as maybe group by company type for strategy analysis.
-# ------------------------------------------------------------------------------------------------------------------------
-
-# TWEAKS
-# ----------------------------------------------------------------------------------------------------------------------
-Technology advancement is currently too difficult even for how difficult it is in real life - adjust the threshold calculation to something more reasonable.
-
-Fix Allowance Decrement
-# ----------------------------------------------------------------------------------------------------------------------
-# REFINEMENT AND EXPERIMENTATION
-# ----------------------------------------------------------------------------------------------------------------------
-DEBUG:
-Find ranges of input values that create sustainable systems for experimental design
-
-EXPERIMENTAL DESIGN:
-Find a few different experiments, regarding lobbying and investment values, to run full experiments on
-
-# ----------------------------------------------------------------------------------------------------------------------

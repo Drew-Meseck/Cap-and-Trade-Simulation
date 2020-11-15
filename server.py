@@ -15,7 +15,7 @@ model_params = {
     "am": UserSettableParameter("checkbox", "Auction Distribution?", False),
     "mSize": UserSettableParameter("slider", "Mean Size Level", .5, .1, 1, .1),
     "lobby": UserSettableParameter("slider", "Cooperation Requirement", .33, 0, 1, .01),
-    "dec": UserSettableParameter("slider", "Allowance Decrement Percentage Per Period", .05, .001, .1, .001)
+    "dec": UserSettableParameter("slider", "Allowance Decrement Percentage Per Period", .005, .0001, .01, .0001)
 }
 
 server = ModularServer(

@@ -94,7 +94,7 @@ class Environment(Model):
         dec = int(self.decN * self.num_allow)
         if len(lob) >= lt:
             #If the lobbying threshold is met, create the decrement ratio and scale the decrement percentage accordingly
-            modifier = sum(lob) / sum(self.t_1_lobby_mem) * random.uniform(.7, 2) #Random effectiveness of lobbying
+            modifier = sum(lob) / sum(self.t_1_lobby_mem) * random.uniform(.1, 1.5) #Random effectiveness of lobbying
             dec = dec * modifier if dec * modifier <= dec else dec
         else:
             dec = 0
@@ -107,7 +107,7 @@ class Environment(Model):
             #This is where the auction each step takes place:
             #Generate new Allowances:
             alls = []
-            for i in range(self.num_allow):
+            for i in range(int(self.num_allow)):
                 alls.append(Allowance(i, o = None))
             #--------------------
             #Auction each allowance
