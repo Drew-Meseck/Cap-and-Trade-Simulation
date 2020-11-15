@@ -1,1 +1,4 @@
 mesa
+multiprocessing
+pandas
+numpy
