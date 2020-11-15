@@ -2,3 +2,5 @@ mesa
 multiprocessing
 pandas
 numpy
+jupyter
+matplotlib

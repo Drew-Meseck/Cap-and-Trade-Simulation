@@ -46,7 +46,8 @@ class Environment(Model):
             "n_allow": "num_allow",
             "mean_prod": "current_prod",
             "emissions": "emissions_t",
-            "mean_cash": "mean_cash_on_hand"}
+            "mean_cash": "mean_cash_on_hand",
+            "period": "period"}
         )
 
         #SETUP CODE===================================================================
@@ -216,7 +217,7 @@ class Environment(Model):
             for i in self.schedule.agents:
                 initial_emissions.append(i.produce_initial())
                 prod.append(i.prod_t)
-                i.setup()
+                #i.setup()
 
             self.emissions_t = sum(initial_emissions)
             print("Total Production Prior to Cap: " + str(sum(prod)))
