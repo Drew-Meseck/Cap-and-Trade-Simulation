@@ -1,5 +1,6 @@
 # Cap-and-Trade-Simulation
-Economics Capstone
+Drew H. Meseck
+Economics Capstone Fall 2020
 
 # To Run this Model:
 1) Clone or download this repository
