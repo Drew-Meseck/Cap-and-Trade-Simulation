@@ -14,7 +14,7 @@ model_params = {
     "cap_size": UserSettableParameter("slider", "Initial Cap Size (%) ", .4, .01, .99, .01),
     "am": UserSettableParameter("checkbox", "Auction Distribution?", False),
     "mSize": UserSettableParameter("slider", "Mean Size Level", .5, .1, 1, .1),
-    "mTech": UserSettableParameter("slider", "Mean Technology Level", 3, 1, 10, 1),
+    "lobby": UserSettableParameter("slider", "Cooperation Requirement", .33, 0, 1, .01),
     "dec": UserSettableParameter("slider", "Allowance Decrement Percentage Per Period", .05, .001, .1, .001)
 }
 

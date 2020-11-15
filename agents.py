@@ -8,9 +8,8 @@ from numpy.random import normal
 class Company(Agent):
     #Attributes of a Company Agent
 
-    def __init__(self, unique_id, model, strats, tl, size):
+    def __init__(self, unique_id, model, tl, size):
         super().__init__(unique_id, model)
-        self.strat_set = strats
         self.s = size
         self.capacity = 100 * size #weighted by constant integer value to make it meaningful in math
         self.tech_level = tl
@@ -109,7 +108,8 @@ class Company(Agent):
             prop_l = 1 - prop_t
         return (prop_l, prop_t, prop_i)
 
-    def valuate(self):
+#AUCTION DECISIONS-----------------------------------------------------------------------------------
+    def valuate(self): #In an ideal world, this valuation function is essentially an artificial intelligence, perhaps in a future version!
         #first estimate their total emissions for the current period
         est_prod = math.log(self.tech_level + 1) * self.capacity
         est_emit = est_prod / (random.uniform(.1, 2) * self.tech_level)
@@ -124,23 +124,25 @@ class Company(Agent):
         if self.cash_on_hand < bid:
             bid = 0 
         return (self, bid)
+#----------------------------------------------------------------------------------------------------
 
+#MARKET STEP------------------------------------------------------------------
+    #Decide if they want to buy or sell allowances during the trading step
     def get_buy_sell(self):
         est_prod = math.log(self.tech_level + 1) * self.capacity
         est_emit = est_prod / (random.uniform(.1, 2) * self.tech_level)
-        stat = len(self.allowances_t) == est_emit
-        return True if stat else False
+        return len(self.allowances_t) < est_emit
 
-
+    #Set the Price of an allowance for sale
     def sell_allowance(self):
         est_prod = math.log(self.tech_level + 1) * self.capacity
         est_emit = est_prod / (random.uniform(.1, 2) * self.tech_level)
         diff = abs(len(self.allowances_t) - int(est_emit))
         price = self.cash_on_hand / est_emit
-        return price * diff
+        return (self, price * diff)
 
 
-
+    #updates the trading status of a the agent during the trading step
     def update_trading(self):
         est_prod = math.log(self.tech_level + 1) * self.capacity
         est_emit = est_prod / (random.uniform(.1, 2) * self.tech_level)
@@ -149,19 +151,13 @@ class Company(Agent):
             self.more_trades = False
         else:
             self.more_trades = True
-
+#-------------------------------------------------------------------------------
 
             
-
-
-
-
 class Allowance():
     #Attributes of an Allowance
-
-
     def __init__(self, id, o):
         self.uid = id
         self.owner = o
 
-    #Functions inherent to the behavior of an allowance
+    #The allowance does not have behavior, it is simply a piece of data

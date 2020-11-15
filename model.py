@@ -7,18 +7,27 @@ from numpy.random import normal
 import math
 
 class Environment(Model):
-    
-    def __init__(self, N, cap_size, am, mSize, mTech, dec):
+    #Constructor for the Environment model class
+    def __init__(self, N, cap_size, am, mSize, lobby, dec):
+        #The number of agents
         self.num_agents = N
+        #Boolean to determine distribution method
         self.auction = am
+        #Average size of the agents
         self.mean_size = mSize
-        self.lobby_threshold = .33
+        #The level of cooperation needed for lobbying to be effective
+        self.lobby_threshold = lobby
+        #number of allowances, determined by the initial cap size
         self.num_allow = 0
+        #The initial number of allowance
         self.max_allow = 0
+        #The decrement level expressed as a percentage of total allowances
         self.decN = dec
+        #the price of goods in the market
         self.price = 10
-        self.mean_tech_level = 0
+        #the initial cap size expressed as a percentage of initial emissions
         self.initial_cap = cap_size
+        #the time step of the model
         self.period = 0
 
         #Reporters
@@ -41,56 +50,62 @@ class Environment(Model):
         )
 
         #SETUP CODE===================================================================
+        #This loop creates all of the agents in the model
         for i in range(self.num_agents):
-            a = Company(i, self, self.strat(), self.tech(), self.market_cap())
+            a = Company(i, self, self.tech(), self.market_cap())
             self.schedule.add(a)
 
-
+        #Sets the status of the model
         self.running = True
-        #===========================================================================
+        #=============================================================================
 
-    def strat(self):
-        return ["Auc_Strat", "Market_Strat", "Invest_Strat"]
-
+    
+    #Deterimes Starting Technology levels for agents
     def tech(self):
-        return random.randint(1, 4)
-
+        return random.choice([1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 6, 7, 8, 9, 10])
+    #Returns a random triangular distribution (for integers) for initial technology levels
     def market_cap(self):
         return random.triangular(0, 1, self.mean_size)
     
+    #Tells all the agents to produce and emit for the step
     def produce_emit(self):
         en = []
         for i in self.schedule.agents:
             en.append(i.produce())
         self.emissions_t = sum(en)
-
+    #Tells all the agents to perform their period investment
     def invest_step(self):
         for i in self.schedule.agents:
             i.invest()
             i.update_tech()
         self.getlobbying()
 
+    #Sets the lobbying memory from last step to inform behavior in the next step
     def getlobbying(self):
         l = []
         for i in self.schedule.agents:
             l.append(i.current_lobby)
         self.t_1_lobby_mem = l
 
+    #Decrements the allowances based on the lobbying for the current period.
     def decrement_allowances(self): #Change this to reflect the scaled value for lobbying
-        l = len(self.t_1_lobby_mem) * self.lobby_threshold
+        lt = len(self.t_1_lobby_mem) * self.lobby_threshold
         lob = [i for i in self.t_1_lobby_mem if i != 0]
         dec = int(self.decN * self.num_allow)
-        if len(lob) >= l:
-            #decrement
-            modifier = sum(lob) / sum(self.t_1_lobby_mem) * random.uniform(.5, 1.5) #Random effectiveness of lobbying
-            dec = dec * modifier if dec * modifier <= dec else 0
+        if len(lob) >= lt:
+            #If the lobbying threshold is met, create the decrement ratio and scale the decrement percentage accordingly
+            modifier = sum(lob) / sum(self.t_1_lobby_mem) * random.uniform(.7, 2) #Random effectiveness of lobbying
+            dec = dec * modifier if dec * modifier <= dec else dec
+        else:
+            dec = 0
         
         self.num_allow -= dec
 
+    #Distributes the alowances based on the distribution method
     def distribute_step(self):
         if self.auction:
             #This is where the auction each step takes place:
-            #Generate Allowances:
+            #Generate new Allowances:
             alls = []
             for i in range(self.num_allow):
                 alls.append(Allowance(i, o = None))
@@ -114,7 +129,9 @@ class Environment(Model):
                 prod.append(c.prod_t)
             total_prod = sum(prod)
             for c in range(len(self.schedule.agents)):
+                #create a ratio based on the production level of this firm relative to the whole market
                 ratio = prod[c] / total_prod
+                #allocate allowances based on their production level
                 na = int(ratio * self.num_allow)
                 for a in range(na):
                     self.schedule.agents[c].allowances_t.append(Allowance(a, self.schedule.agents[c]))
@@ -126,6 +143,9 @@ class Environment(Model):
                 x = random.choice(self.schedule.agents)
                 x.allowances_t.append(Allowance(879, x))
             remain -= remain
+            
+            
+            #Some Testing Output used in previous versions
 
             #print("DISTRIBUTE STEP:")
             #print(str(total_all) + ' ' + str(self.num_allow))
@@ -133,13 +153,14 @@ class Environment(Model):
             #for i in self.schedule.agents:
                #print(len(i.allowances_t))
 
-
+    #Defines the framework with which trading takes place
     def trade_step(self):
         market = []
         for company in self.schedule.agents:
             company.more_trades = True
         trading = True
         count = 0
+        #If there are more trades, or the trading period has more time left, continue trading
         while(trading and count < 10):
             m_len_i = len(market)
             for i in self.schedule.agents:
@@ -154,8 +175,9 @@ class Environment(Model):
                                 seller.cash_on_hand += a[1]
                                 buyer.cash_on_hand -= a[1]
                                 buyer.allowances_t.append(seller.allowances_t.pop())
+                                market.remove(a)
                                 break
-                    else: #They want to sell
+                    elif not dec: #They want to sell
                         market.append(i.sell_allowance())
                 #Update the trading status of the emitter
                 i.update_trading()
@@ -210,13 +232,20 @@ class Environment(Model):
 
         #STEP================================================================================
         else:
+            #Distribute allowances
             self.distribute_step()
+            #Trade allowances
             self.trade_step()
+            #Produce goods and emit pollutants (Carbon)
             self.produce_emit()
+            #Invest in technological advancement and lobbying
             self.invest_step()
+            #Decrement the number of allowances for next step
             self.decrement_allowances()
+            #Collect Data-----------------------------------
             self.update_reporters()
             self.datacollector.collect(self)
+            #-----------------------------------------------
             self.period += 1
             if self.period == 500 + 1 or self.num_allow <= 10:
                 self.running = False
