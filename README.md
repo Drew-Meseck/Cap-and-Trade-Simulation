@@ -13,3 +13,11 @@ Economics Capstone Fall 2020
 
 5) Drag input sliders to desired values, and select the auction status, and select "Start" this should run the model!
 
+# Note about Experiments:
+
+If you would like to run the experiments, the batchrunner used is the MASTER version of BatchRunnerMP rather than the STABLE version. This file is the batchrunner.py file that exists here: https://github.com/projectmesa/mesa/blob/master/mesa/batchrunner.py
+so if need be replace the version of the batchrunner you have with this file as it is not the one that comes with the pip install of mesa.
+
+This is necessary as the multiprocessing is very useful for running the experiments in a reasonable time! All experiments are contained within the jupyter notebook Experiments.ipynb.
+
+
