@@ -248,6 +248,6 @@ class Environment(Model):
             self.datacollector.collect(self)
             #-----------------------------------------------
             self.period += 1
-            if self.period == 500 + 1 or self.num_allow <= 10:
+            if self.period == 200:
                 self.running = False
         #====================================================================================
