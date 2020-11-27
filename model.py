@@ -1,3 +1,5 @@
+#The class file containing the actual model specification.
+
 from mesa import Model, Agent
 from mesa.time import RandomActivation
 from mesa.datacollection import DataCollector
@@ -37,6 +39,7 @@ class Environment(Model):
         self.t_1_lobby_mem = [0 for i in range(self.num_agents)]
         self.mean_cash_on_hand = 0
         self.emissions_t = 0
+        self.avg_emit = 0
 
 
         self.schedule = RandomActivation(self)
@@ -47,7 +50,8 @@ class Environment(Model):
             "mean_prod": "current_prod",
             "emissions": "emissions_t",
             "mean_cash": "mean_cash_on_hand",
-            "period": "period"}
+            "period": "period",
+            "avg_emit": "avg_emit"}
         )
 
         #SETUP CODE===================================================================
@@ -203,10 +207,12 @@ class Environment(Model):
             sum_tech += i.tech_level
             sum_prod += i.prod_t
             sum_cash += i.cash_on_hand
+
         self.mean_tech_level = sum_tech / len(self.schedule.agents)
         self.current_prod = sum_prod / len(self.schedule.agents)
         self.mean_cash_on_hand = sum_cash / len(self.schedule.agents)
         self.current_lobby = sum(self.t_1_lobby_mem)
+        self.avg_emit = self.emissions_t / len(self.schedule.agents)
 
 
     def step(self):
